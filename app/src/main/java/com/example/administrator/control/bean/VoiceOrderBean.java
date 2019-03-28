@@ -19,16 +19,16 @@ package com.example.administrator.control.bean;
  */
 
 
-public class OrderBean {
+public class VoiceOrderBean {
     private final static int SIZE = 8;
     private byte list[];
-    public static volatile OrderBean instance;
+    public static volatile VoiceOrderBean instance;
 
-    public synchronized static OrderBean getInstance() {
+    public synchronized static VoiceOrderBean getInstance() {
         if (instance == null)
-            synchronized (OrderBean.class) {
+            synchronized (VoiceOrderBean.class) {
                 if (instance == null)
-                    instance = new OrderBean();
+                    instance = new VoiceOrderBean();
             }
         return instance;
     }

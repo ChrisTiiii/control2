@@ -116,24 +116,38 @@
                 android:id="@+id/ll_voice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <com.example.administrator.control.weight.TempControlView
-                    android:id="@+id/temp_control1"
-                    android:layout_width="260dp"
-                    android:layout_height="260dp"
-                    android:layout_centerInParent="true"
-                    android:layout_marginTop="40dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:src="@drawable/back_voice" />
 
-                <com.example.administrator.control.weight.TempControlView
-                    android:id="@+id/temp_control2"
-                    android:layout_width="260dp"
-                    android:layout_height="260dp"
-                    android:layout_centerInParent="true"
-                    android:layout_marginTop="40dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|top"
+                    android:orientation="horizontal">
 
+                    <com.example.administrator.control.weight.TempControlView
+                        android:id="@+id/temp_control1"
+                        android:layout_width="260dp"
+                        android:layout_height="260dp"
+                        android:layout_centerInParent="true"
+                        android:layout_marginTop="40dp" />
+
+                    <com.example.administrator.control.weight.TempControlView
+                        android:id="@+id/temp_control2"
+                        android:layout_width="260dp"
+                        android:layout_height="260dp"
+                        android:layout_centerInParent="true"
+                        android:layout_marginTop="40dp" />
+
+
+                </LinearLayout>
 
             </LinearLayout>
+
 
             <LinearLayout
                 android:id="@+id/ll_wel"
@@ -146,16 +160,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:src="@drawable/back_wel" />
-
-                <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:background="@color/item"-->
-                <!--android:paddingLeft="8dp"-->
-                <!--android:text="设置欢迎词"-->
-                <!--android:textColor="@color/white"-->
-                <!--android:textSize="20sp"-->
-                <!--android:textStyle="bold" />-->
 
 
                 <LinearLayout
@@ -308,20 +312,41 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+
+                <LinearLayout
+                    android:id="@+id/ll_option_voice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:src="@drawable/back_voice" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center|top"
+                        android:orientation="horizontal">
+
+                        <com.example.administrator.control.weight.TempControlView
+                            android:id="@+id/voice_control"
+                            android:layout_width="260dp"
+                            android:layout_height="260dp"
+                            android:layout_marginTop="40dp" />
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:src="@drawable/back_video" />
 
-                <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:background="@color/item"-->
-                <!--android:paddingLeft="8dp"-->
-                <!--android:text="视频"-->
-                <!--android:textColor="@color/white"-->
-                <!--android:textSize="20sp"-->
-                <!--android:textStyle="bold" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -643,15 +668,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:src="@drawable/back_light" />
-                <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:background="@color/item"-->
-                <!--android:paddingLeft="8dp"-->
-                <!--android:text="灯光"-->
-                <!--android:textColor="@color/white"-->
-                <!--android:textSize="20sp"-->
-                <!--android:textStyle="bold" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -715,16 +731,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:src="@drawable/back_ppt" />
-
-                <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:background="@color/item"-->
-                <!--android:paddingLeft="8dp"-->
-                <!--android:text="PPT"-->
-                <!--android:textColor="@color/white"-->
-                <!--android:textSize="20sp"-->
-                <!--android:textStyle="bold" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -880,15 +886,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:src="@drawable/back_img" />
-                <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:background="@color/item"-->
-                <!--android:paddingLeft="8dp"-->
-                <!--android:text="图片"-->
-                <!--android:textColor="@color/white"-->
-                <!--android:textSize="20sp"-->
-                <!--android:textStyle="bold" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -1061,7 +1058,6 @@
                             android:textColor="@color/white"
                             android:textSize="20sp" />
                     </LinearLayout>
-
 
                 </LinearLayout>
 

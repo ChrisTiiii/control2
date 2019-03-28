@@ -20,7 +20,7 @@ import com.example.administrator.control.adapter.ComupterAdapter;
 import com.example.administrator.control.bean.AcceptCommand;
 import com.example.administrator.control.bean.EqupmentBean;
 import com.example.administrator.control.bean.GFBean;
-import com.example.administrator.control.bean.OrderBean;
+import com.example.administrator.control.bean.VoiceOrderBean;
 import com.example.administrator.control.bean.SendCommand;
 import com.example.administrator.control.fragment.ControlFragment;
 import com.example.administrator.control.tcp.ClientThread;
@@ -55,7 +55,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
  * @Date 2019/1/15 0015 上午 11:22
  * @Description: 应用主界面
  */
-public class MainActivity extends AppCompatActivity implements UDPSocket.WaitForDataListener {
+public class MainActivity extends AppCompatActivity implements UDPSocket.WaitForDataListener, ControlFragment.UpdateEqupListInterFace {
 
     @BindView(R.id.computer_list)
     RecyclerView computerList;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
     private UDPSocket socket;
     final String[] items = new String[]{"重新连接", "有效期", "退出登录", "配置文件"};//创建item
     ControlFragment controlFragment;
+    private int voice[] = new int[255];//存放具体设备的声音
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
     @Override
     protected void onResume() {
         super.onResume();
-//        reConnect();
+        reConnect();
         //创建一个ContentVa对象（自定义的）
         String begin = helper.getString("begin");
         String end = helper.getString("end");
@@ -148,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
                             }
                             gfList.clear();
                             List<String> tempList = Arrays.asList(((String) ((AcceptCommand) obj).getCommand()).split(","));
+                            gfList.add(new GFBean(-1, 0, -1));
                             for (String s : tempList) {
                                 gfList.add(new GFBean(Integer.valueOf(s), 0, 1));
                             }
@@ -168,6 +170,19 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
                                     break;
                                 case "Success":
                                     list.get(_position).setStatus(1);
+                                    System.out.println("通道号：" + ((AcceptCommand) obj).getMsg());
+                                    int chanel = Integer.valueOf((String) ((AcceptCommand) obj).getMsg());
+                                    String id = ((AcceptCommand) obj).getSendTo();
+                                    int tt = whichChanel(chanel);
+                                    if (tt != -1) {
+                                        gfList.get(tt).setVoice(voice[chanel]);
+                                    } else {
+                                        GFBean gfBean = new GFBean(chanel, voice[chanel], 1);
+                                        gfBean.setId(Integer.valueOf(id));
+                                        gfList.add(gfBean);
+                                        socket.sendBytes(VoiceOrderBean.getInstance().sendGFStatus(chanel));
+                                        list.get(_position).setChanel(chanel);
+                                    }
                                     Toast.makeText(this, "设备：" + list.get(_position).getName() + "在线", Toast.LENGTH_SHORT).show();
                                     comupterAdapter.update(list);
                                     break;
@@ -179,6 +194,22 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
                 }
                 break;
         }
+    }
+
+    /**
+     * 判断当前通道是否存在GFList
+     *
+     * @param chanel
+     * @return
+     */
+    public int whichChanel(int chanel) {
+        int isExit = -1;
+        for (int i = 0; i < gfList.size(); i++) {
+            if (gfList.get(i).getChanel() == chanel) {
+                isExit = i;
+            }
+        }
+        return isExit;
     }
 
     private void setClick() {
@@ -198,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
                             Thread.sleep(100);
                             controlFragment = new ControlFragment(account, list.get(position), clientThread, controlThread, socket, gfList);
                             getSupportFragmentManager().beginTransaction().replace(R.id.right_fragment, controlFragment).commit();
+                            controlFragment.setUpdateEqupListInterFace(MainActivity.this);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -239,9 +271,10 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
         if (NetWorkUtil.isNetworkAvailable(this)) {
             controlFragment = new ControlFragment(account, list.get(0), clientThread, controlThread, socket, gfList);
             getSupportFragmentManager().beginTransaction().replace(R.id.right_fragment, controlFragment).commit();
-            for (int i = 0; i < gfList.size(); i++) {
+            controlFragment.setUpdateEqupListInterFace(MainActivity.this);
+            for (int i = 1; i < gfList.size(); i++) {
                 try {
-                    socket.sendBytes(OrderBean.getInstance().sendGFStatus(gfList.get(i).getChanel()));
+                    socket.sendBytes(VoiceOrderBean.getInstance().sendGFStatus(gfList.get(i).getChanel()));
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -402,9 +435,16 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
     @Override
     public void waitForData(int chanel, String msg) {
         if (gfList.size() > 0) {
-            gfList.get(chanel - 1).setVoice(Integer.parseInt(msg));
+            gfList.get(chanel).setVoice(Integer.parseInt(msg));
             controlFragment.setGfList(gfList);
             Log.i("ui", msg);
         }
+    }
+
+
+    @Override
+    public void update(int position, int temp) {
+        voice[gfList.get(position).getChanel()] = temp;
+        gfList.get(position).setVoice(temp);
     }
 }

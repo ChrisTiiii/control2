@@ -30,8 +30,6 @@ import java.net.SocketTimeoutException;
  * Description:tcp客户端线程
  **/
 public class ClientThread implements Runnable {
-    //    private static final String IP = "192.168.1.107";
-//    private static final int SPORT = 2222;
     private static final int TIME_OUT = 10000;//超时
     private OutputStream os;
     private BufferedReader br;

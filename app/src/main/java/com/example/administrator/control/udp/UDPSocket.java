@@ -30,9 +30,6 @@ public class UDPSocket {
     private byte[] receiveByte = new byte[BUFFER_LENGTH];
 
     private String BROADCAST_IP;
-
-
-    // 端口号，费显协议默认端口10001
     public int CLIENT_PORT;
     private boolean isThreadRunning = false;
 

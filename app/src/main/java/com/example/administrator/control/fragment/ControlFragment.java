@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +16,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.administrator.control.MainActivity;
 import com.example.administrator.control.R;
+import com.example.administrator.control.bean.ControlOrderBean;
 import com.example.administrator.control.bean.EqupmentBean;
 import com.example.administrator.control.bean.GFBean;
-import com.example.administrator.control.bean.OrderBean;
+import com.example.administrator.control.bean.VoiceOrderBean;
 import com.example.administrator.control.bean.SendCommand;
 import com.example.administrator.control.tcp.ClientThread;
 import com.example.administrator.control.tcp.ControlThread;
@@ -137,14 +136,20 @@ public class ControlFragment extends Fragment {
     TempControlView tempControl2;
     @BindView(R.id.ll_voice)
     LinearLayout llVoice;
+    @BindView(R.id.voice_control)
+    TempControlView voiceControl;
+    @BindView(R.id.ll_option_voice)
+    LinearLayout llOptionVoice;
 
     private EqupmentBean equpBean;
     private ClientThread thread;
     private ControlThread controlThread;
     private String account;
     private String orders[];
-    UDPSocket socket;
+    private UDPSocket socket;
     private List<GFBean> gfList;
+    private UpdateEqupListInterFace updateEqupListInterFace;
+    private int _position = -1;
 
     public ControlFragment(String account, EqupmentBean equpBean, ClientThread thread, ControlThread controlThread, UDPSocket socket, List<GFBean> gfList) {
         this.account = account;
@@ -169,15 +174,26 @@ public class ControlFragment extends Fragment {
                 llOption.setVisibility(View.GONE);
                 llWel.setVisibility(View.VISIBLE);
                 llVoice.setVisibility(View.VISIBLE);
-                if (gfList.size() > 0) {
-                    if (!TextUtils.isEmpty(SharedPreferencesManager.getInstance(getContext()).getChanelName(gfList.get(0).getChanel())))
-                        voiceControl(tempControl1, gfList.get(0).getVoice(), SharedPreferencesManager.getInstance(getContext()).getChanelName(gfList.get(0).getChanel()), gfList.get(0).getChanel() - 1);
-                    else
-                        voiceControl(tempControl1, gfList.get(0).getVoice(), "设备" + gfList.get(0).getChanel(), gfList.get(0).getChanel());
-                    if (!TextUtils.isEmpty(SharedPreferencesManager.getInstance(getContext()).getChanelName(gfList.get(1).getChanel())))
-                        voiceControl(tempControl2, gfList.get(1).getVoice(), SharedPreferencesManager.getInstance(getContext()).getChanelName(gfList.get(1).getChanel()), gfList.get(1).getChanel() - 1);
-                    else
-                        voiceControl(tempControl1, gfList.get(1).getVoice(), "设备" + gfList.get(1).getChanel(), gfList.get(1).getChanel());
+                for (int i = 0; i < gfList.size(); i++) {
+                    int chanel = gfList.get(i).getChanel();
+                    switch (chanel) {
+                        case 1:
+                            int voice = gfList.get(i).getVoice();
+                            if (!TextUtils.isEmpty(SharedPreferencesManager.getInstance(getContext()).getChanelName(chanel)))
+                                voiceControl(tempControl1, voice, SharedPreferencesManager.getInstance(getContext()).getChanelName(chanel), chanel, 1);
+                            else
+                                voiceControl(tempControl1, voice, "设备通道" + chanel, chanel, 1);
+                            break;
+                        case 2:
+                            int voice2 = gfList.get(i).getVoice();
+                            if (!TextUtils.isEmpty(SharedPreferencesManager.getInstance(getContext()).getChanelName(chanel)))
+                                voiceControl(tempControl2, voice2, SharedPreferencesManager.getInstance(getContext()).getChanelName(chanel), chanel, 1);
+                            else
+                                voiceControl(tempControl2, voice2, "设备通道" + chanel, chanel, 1);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             } else {
                 llVoice.setVisibility(View.GONE);
@@ -190,11 +206,24 @@ public class ControlFragment extends Fragment {
                     computerId.setText(equpBean.getName());
                     computerStatus.setTextColor(Color.parseColor("#43fdff"));
                     computerStatus.setText("• 设备在线");
+                    _position = whichPosition();
+                    if (_position != -1) {
+                        int voice = gfList.get(_position).getVoice();
+                        int chanel = gfList.get(_position).getChanel();
+                        if (chanel == -1) {
+                            llOptionVoice.setVisibility(View.GONE);
+                        } else llOptionVoice.setVisibility(View.VISIBLE);
+                        if (!TextUtils.isEmpty(SharedPreferencesManager.getInstance(getContext()).getChanelName(chanel))) {
+                            voiceControl(voiceControl, voice, SharedPreferencesManager.getInstance(getContext()).getChanelName(chanel), chanel, 2);
+                        } else
+                            voiceControl(voiceControl, voice, "设备通道" + chanel, chanel, 2);
+                    }
                     break;
                 case -1:
                     computerStatus.setTextColor(Color.parseColor("#ff6e6e"));
                     computerId.setText(equpBean.getName());
                     computerStatus.setText("• 设备不在线");
+                    llOptionVoice.setVisibility(View.GONE);
                     break;
                 case 0:
                     computerId.setText(equpBean.getName());
@@ -308,11 +337,11 @@ public class ControlFragment extends Fragment {
                 sendOrder(orders);
                 break;
             case R.id.btn_light_open:
-                orders = new String[]{"aa0f0001010101010101010101010101010101bb", "aa0f0101010101010101010101010101010101bb", "aa0f0201010101010101010101010101010101bb", "aa0f0301010101010101010101010101010101bb"};
+                orders = new String[]{ControlOrderBean.getInstance().open(00), ControlOrderBean.getInstance().open(01), ControlOrderBean.getInstance().open(02), ControlOrderBean.getInstance().open(03)};
                 sendOrder(orders);
                 break;
             case R.id.btn_light_close:
-                orders = new String[]{"aa0f0002010101010101010101010101010101bb", "aa0f0102010101010101010101010101010101bb", "aa0f0202010101010101010101010101010101bb", "aa0f0302010101010101010101010101010101bb"};
+                orders = new String[]{ControlOrderBean.getInstance().close(00), ControlOrderBean.getInstance().close(01), ControlOrderBean.getInstance().close(02), ControlOrderBean.getInstance().close(03)};
                 sendOrder(orders);
                 break;
             case R.id.btn_img_last:
@@ -397,70 +426,85 @@ public class ControlFragment extends Fragment {
         }
     }
 
-    public void voiceControl(TempControlView tempControl, int temp, String title, final int chanel) {
+    public void voiceControl(TempControlView tempControl, int voice, String title, final int chanel, final int type) {
         tempControl.setTitle(title);
-        tempControl.setTemp(temp);
+        tempControl.setTemp(voice);
         tempControl.setOnTempChangeListener(new TempControlView.OnTempChangeListener() {
             @Override
             public void change(int temp) {
-                System.out.println("temp:" + temp + ",voice[" + chanel + "]:" + gfList.get(chanel).getVoice());
-                if (temp > gfList.get(chanel).getVoice()) {
-                    calTempOrderUp(temp, chanel);
-                } else if (temp < gfList.get(chanel).getVoice()) {
-                    calTempOrderDown(temp, chanel);
+                switch (type) {
+                    case 1:
+                        System.out.println("temp:" + temp + ",voice[" + chanel + "]:" + gfList.get(chanel).getVoice());
+                        if (temp > gfList.get(chanel).getVoice()) {
+                            calTempOrderUp(temp, chanel, gfList.get(chanel).getVoice(), type);
+                        } else if (temp < gfList.get(chanel).getVoice()) {
+                            calTempOrderDown(temp, chanel, gfList.get(chanel).getVoice(), type);
+                        }
+                        break;
+                    case 2:
+                        System.out.println("temp:" + temp + ",voice[" + chanel + "]:" + gfList.get(_position).getVoice());
+                        if (temp > gfList.get(_position).getVoice()) {
+                            calTempOrderUp(temp, chanel, gfList.get(_position).getVoice(), type);
+                        } else if (temp < gfList.get(_position).getVoice()) {
+                            calTempOrderDown(temp, chanel, gfList.get(_position).getVoice(), type);
+                        }
+                        break;
                 }
+
             }
         });
 
         tempControl.setOnClickListener(new TempControlView.OnClickListener() {
             @Override
             public void onClick(int temp) {
-                System.out.println("temp:" + temp + ",voice[" + chanel + "]:" + gfList.get(chanel).getVoice());
-                if (temp > gfList.get(chanel).getVoice()) {
-                    calTempOrderUp(temp, chanel);
-                } else if (temp < gfList.get(chanel).getVoice()) {
-                    calTempOrderDown(temp, chanel);
+                switch (type) {
+                    case 1:
+                        System.out.println("temp:" + temp + ",voice[" + chanel + "]:" + gfList.get(chanel).getVoice());
+                        if (temp > gfList.get(chanel).getVoice()) {
+                            calTempOrderUp(temp, chanel, gfList.get(chanel).getVoice(), type);
+                        } else if (temp < gfList.get(chanel).getVoice()) {
+                            calTempOrderDown(temp, chanel, gfList.get(chanel).getVoice(), type);
+                        }
+                        break;
+                    case 2:
+                        System.out.println("temp:" + temp + ",voice[" + chanel + "]:" + gfList.get(_position).getVoice());
+                        if (temp > gfList.get(_position).getVoice()) {
+                            calTempOrderUp(temp, chanel, gfList.get(_position).getVoice(), type);
+                        } else if (temp < gfList.get(_position).getVoice()) {
+                            calTempOrderDown(temp, chanel, gfList.get(_position).getVoice(), type);
+                        }
+                        break;
                 }
             }
         });
     }
 
     /**
-     * 计算控制指令发送的次数/数值
+     * 计算当前通道在gfList中的那个位置
      *
-     * @param temp
-     * @param type
+     * @return
      */
-    private void calTempOrderUp(int temp, int type) {
-        int aa = temp - gfList.get(type).getVoice();//当前数值差
-        int bb = aa / 25;//循环发送次数
-        int cc = aa % 25;//剩下指令发送
-        for (int i = 0; i < bb; i++) {
-            socket.sendBytes(OrderBean.getInstance().up(type, 25));
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    public int whichPosition() {
+        for (int i = 0; i < gfList.size(); i++) {
+            if (gfList.get(i).getChanel() == equpBean.getChanel()) {
+                return i;
             }
         }
-        if (cc > 0) {
-            socket.sendBytes(OrderBean.getInstance().up(type, cc));
-        }
-        gfList.get(type).setVoice(temp);
+        return -1;
     }
 
     /**
      * 计算控制指令发送的次数/数值
      *
      * @param temp
-     * @param type
+     * @param chanel
      */
-    private void calTempOrderDown(int temp, int type) {
-        int aa = gfList.get(type).getVoice() - temp;//当前数值差
+    private void calTempOrderUp(int temp, int chanel, int voice, int type) {
+        int aa = temp - voice;//当前数值差
         int bb = aa / 25;//循环发送次数
         int cc = aa % 25;//剩下指令发送
         for (int i = 0; i < bb; i++) {
-            socket.sendBytes(OrderBean.getInstance().down(type, 25));
+            socket.sendBytes(VoiceOrderBean.getInstance().up(chanel, 25));
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -468,15 +512,63 @@ public class ControlFragment extends Fragment {
             }
         }
         if (cc > 0) {
-            socket.sendBytes(OrderBean.getInstance().down(type, cc));
+            socket.sendBytes(VoiceOrderBean.getInstance().up(chanel, cc));
         }
-        gfList.get(type).setVoice(temp);
+        switch (type) {
+            case 1:
+                gfList.get(chanel).setVoice(temp);
+                break;
+            case 2:
+                gfList.get(_position).setVoice(temp);
+                updateEqupListInterFace.update(_position, temp);
+                break;
+        }
+    }
+
+    /**
+     * 计算控制指令发送的次数/数值
+     *
+     * @param temp
+     * @param chanel
+     */
+    private void calTempOrderDown(int temp, int chanel, int voice, int type) {
+        int aa = voice - temp;//当前数值差
+        int bb = aa / 25;//循环发送次数
+        int cc = aa % 25;//剩下指令发送
+        for (int i = 0; i < bb; i++) {
+            socket.sendBytes(VoiceOrderBean.getInstance().down(chanel, 25));
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (cc > 0) {
+            socket.sendBytes(VoiceOrderBean.getInstance().down(chanel, cc));
+        }
+        switch (type) {
+            case 1:
+                gfList.get(chanel).setVoice(temp);
+                break;
+            case 2:
+                gfList.get(_position).setVoice(temp);
+                updateEqupListInterFace.update(_position, temp);
+                break;
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+    }
+
+    public void setUpdateEqupListInterFace(UpdateEqupListInterFace updateEqupListInterFace) {
+        this.updateEqupListInterFace = updateEqupListInterFace;
+    }
+
+    public interface UpdateEqupListInterFace {
+        void update(int position, int voice);
     }
 
     public List<GFBean> getGfList() {
@@ -486,4 +578,6 @@ public class ControlFragment extends Fragment {
     public void setGfList(List<GFBean> gfList) {
         this.gfList = gfList;
     }
+
+
 }

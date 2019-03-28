@@ -57,7 +57,7 @@ public class ControlThread implements Runnable {
             }
             //接收服务端的数据
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
-//            getData();
+            getData();
         } catch (IOException e) {
             e.printStackTrace();
             if (e instanceof SocketTimeoutException) {

@@ -6,6 +6,7 @@ package com.example.administrator.control.bean;
  * Description:
  */
 public class GFBean {
+    private int id;//设备ID
     private int chanel;//通道号
     private int voice;//当前音量
     private int status;//1 为开 0 为关 -1为error
@@ -21,6 +22,14 @@ public class GFBean {
         return chanel;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setChanel(int chanel) {
         this.chanel = chanel;
     }
@@ -31,5 +40,13 @@ public class GFBean {
 
     public void setVoice(int voice) {
         this.voice = voice;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }
