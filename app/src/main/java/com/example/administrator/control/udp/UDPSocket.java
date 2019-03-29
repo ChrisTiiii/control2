@@ -127,7 +127,8 @@ public class UDPSocket {
                     System.out.println("第六位：" + EncodingConversionTools.byte2HexStr(new byte[]{temp[5]}) + "  第七位：" + EncodingConversionTools.byte2HexStr(new byte[]{temp[6]}));
                     System.out.println("获取到的：" + EncodingConversionTools.parseHex4(String.valueOf(tt)));
                     double finNum = EncodingConversionTools.parseHex4(String.valueOf(tt)) / 100;
-                    finNum = finNum >= 0 ? (finNum - 72) * 0.84 : (72 + finNum) * 0.84;
+                    finNum = (finNum + 72)/ 0.84;
+                    System.out.println("finNum after:" + finNum);
                     waitForDataListener.waitForData(Integer.valueOf(EncodingConversionTools.byte2HexStr(new byte[]{temp[4]})), String.valueOf((int) finNum));
                 }
             }

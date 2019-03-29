@@ -435,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements UDPSocket.WaitFor
     @Override
     public void waitForData(int chanel, String msg) {
         if (gfList.size() > 0) {
-            gfList.get(chanel).setVoice(Integer.parseInt(msg));
+            gfList.get(whichChanel(chanel)).setVoice(Integer.parseInt(msg));
             controlFragment.setGfList(gfList);
             Log.i("ui", msg);
         }

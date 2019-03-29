@@ -500,7 +500,7 @@ public class ControlFragment extends Fragment {
      * @param chanel
      */
     private void calTempOrderUp(int temp, int chanel, int voice, int type) {
-        int aa = temp - voice;//当前数值差
+        int aa = (int) ((temp - voice) * 0.84);//当前数值差
         int bb = aa / 25;//循环发送次数
         int cc = aa % 25;//剩下指令发送
         for (int i = 0; i < bb; i++) {
@@ -532,7 +532,7 @@ public class ControlFragment extends Fragment {
      * @param chanel
      */
     private void calTempOrderDown(int temp, int chanel, int voice, int type) {
-        int aa = voice - temp;//当前数值差
+        int aa = (int) ((voice - temp) * 0.84);//当前数值差
         int bb = aa / 25;//循环发送次数
         int cc = aa % 25;//剩下指令发送
         for (int i = 0; i < bb; i++) {
